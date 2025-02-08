@@ -18,13 +18,8 @@ pub extern "C" fn _start() -> ! {
     for (i, &byte) in HELLO.iter().enumerate() {
         unsafe {
             *vbg_buffer.offset(i as isize * 2) = byte;
-            *vbg_buffer.offset(i as isize * 2 + 1) = 0xb;
+            *vbg_buffer.offset(i as isize * 2 + 1) = 0xf;
         }
-    }
-
-    unsafe {
-        *vbg_buffer.offset(0) = b'M';    // 写入字符
-        *vbg_buffer.offset(1) = 0x0F;    // 设置为白色
     }
 
     loop {}
