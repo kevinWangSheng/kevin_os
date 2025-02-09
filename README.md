@@ -37,3 +37,26 @@ qemu-system-x86_64 \
 ```
 就会出现一个界面：
 ![alt text](image.png)
+
+
+然后如果想要使用更方便的命令整合，比如cargo run运行整个部分，参照.cargo/config.toml的配置如下
+```toml
+[target.'cfg(target_os = "none")']
+runner = "bootimage runner"
+
+[unstable]
+build-std = ["core", "compiler_builtins"]
+build-std-features = ["compiler-builtins-mem"]
+
+[build]
+target = "x86_64_kevin_os.json"
+
+[target.x86_64-kevin_os]
+runner = """
+bootimage runner --timeout 300
+qemu-system-x86_64 \
+    -drive format=raw,file=target/x86_64-kevin_os/debug/bootimage-kevin_os.bin \
+    -serial stdio \
+    -display sdl \
+"""
+```
