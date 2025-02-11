@@ -2,6 +2,8 @@
 #![no_std]
 #![no_main]
 use core::panic::PanicInfo;
+
+use vga_buffer::WRITER;
 mod vga_buffer;
 #[panic_handler]
 fn panic(_info:&PanicInfo)->!{
@@ -9,7 +11,7 @@ fn panic(_info:&PanicInfo)->!{
         
     }
 }
-
+#[allow(dead_code)]
 static HELLO: &[u8] = b"Hello World!";
 
 #[no_mangle]
@@ -22,6 +24,7 @@ pub extern "C" fn _start() -> ! {
     //         *vbg_buffer.offset(i as isize * 2 + 1) = 0xf;
     //     }
     // }
-    vga_buffer::write_something();
+    // vga_buffer::write_something();
+    println!("hello world");
     loop {}
 }
