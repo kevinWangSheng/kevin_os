@@ -16,3 +16,13 @@ qemu-system-x86_64 \
     -serial stdio \
     -display sdl \
 """
+
+[target.x86_64-kevin_os.test]
+runner = """
+bootimage runner --timeout 300
+qemu-system-x86_64 \
+    -drive format=raw,file=target/x86_64-kevin_os/debug/bootimage-kevin_os.bin \
+    -serial stdio \
+    -display none \
+    -device isa-debug-exit,iobase=0xf4,iosize=0x04 \
+"""

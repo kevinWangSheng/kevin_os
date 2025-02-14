@@ -1,15 +1,19 @@
-
 #![no_std]
 #![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(kevin_os::test_runner)]
+#![reexport_test_harness_main = "test_main"]
+mod serial;
 use core::panic::PanicInfo;
 
-use vga_buffer::WRITER;
+use vga_buffer::{BUFFER_HEIGHT, WRITER};
 mod vga_buffer;
+
 #[panic_handler]
-fn panic(_info:&PanicInfo)->!{
-    loop {
-        
-    }
+#[cfg(not(test))] 
+fn panic(_info: &PanicInfo) -> ! {
+    println!("{}",_info);
+    loop {}
 }
 #[allow(dead_code)]
 static HELLO: &[u8] = b"Hello World!";
@@ -25,6 +29,23 @@ pub extern "C" fn _start() -> ! {
     //     }
     // }
     // vga_buffer::write_something();
-    println!("hello world");
+    println!("hello world!!");
+    #[cfg(test)]
+    test_main();
     loop {}
+}
+
+
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    use kevin_os::test_panic_handler;
+
+    test_panic_handler(info)
+}
+
+#[test_case]
+pub fn test_main(){
+    serial_print!("main test");
 }
