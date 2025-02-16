@@ -3,8 +3,10 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![feature(abi_x86_interrupt)]
 pub mod serial;
 pub mod vga_buffer;
+pub mod interrupts;
 use core::panic::PanicInfo;
 
 use vga_buffer::{BUFFER_HEIGHT, WRITER};
@@ -24,6 +26,10 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
     }
 }
 
+pub fn init(){
+    interrupts::init_idt();
+}
+
 pub fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
     for test in tests {
@@ -35,6 +41,8 @@ pub fn test_runner(tests: &[&dyn Testable]) {
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    // init the breakpoint exception 
+    init();
     test_main();
     loop {}
 }

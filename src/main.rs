@@ -7,6 +7,7 @@ mod serial;
 use core::panic::PanicInfo;
 
 use vga_buffer::{BUFFER_HEIGHT, WRITER};
+use x86_64::structures::idt::Entry;
 mod vga_buffer;
 
 #[panic_handler]
@@ -30,8 +31,13 @@ pub extern "C" fn _start() -> ! {
     // }
     // vga_buffer::write_something();
     println!("hello world!!");
+    kevin_os::init();
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3();
     #[cfg(test)]
     test_main();
+
+    println!("It did not crash!");
     loop {}
 }
 
