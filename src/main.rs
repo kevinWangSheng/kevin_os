@@ -32,6 +32,12 @@ pub extern "C" fn _start() -> ! {
     // vga_buffer::write_something();
     println!("hello world!!");
     kevin_os::init();
+    
+    fn stack_overflow(){
+        stack_overflow();
+    }
+    // trigger a stack overflow 
+    stack_overflow();
     // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3();
     #[cfg(test)]

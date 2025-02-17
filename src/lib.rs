@@ -8,7 +8,7 @@ pub mod serial;
 pub mod vga_buffer;
 pub mod interrupts;
 use core::panic::PanicInfo;
-
+pub mod gdt;
 use vga_buffer::{BUFFER_HEIGHT, WRITER};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -27,6 +27,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 }
 
 pub fn init(){
+    gdt::init();
     interrupts::init_idt();
 }
 
