@@ -6,15 +6,15 @@
 mod serial;
 use core::panic::PanicInfo;
 
-use vga_buffer::{BUFFER_HEIGHT, WRITER};
-use x86_64::structures::idt::Entry;
+// use vga_buffer::{BUFFER_HEIGHT, WRITER};
+// use x86_64::structures::idt::Entry;
 mod vga_buffer;
 
 #[panic_handler]
 #[cfg(not(test))] 
 fn panic(_info: &PanicInfo) -> ! {
     println!("{}",_info);
-    loop {}
+    kevin_os::hlt_loop();
 }
 #[allow(dead_code)]
 static HELLO: &[u8] = b"Hello World!";
@@ -37,14 +37,17 @@ pub extern "C" fn _start() -> ! {
         stack_overflow();
     }
     // trigger a stack overflow 
-    stack_overflow();
+    // stack_overflow();
     // invoke a breakpoint exception
-    x86_64::instructions::interrupts::int3();
+    // x86_64::instructions::interrupts::int3();
+    println!("It did not crash!");
+    // loop {
+    //     use kevin_os::print;
+    //     print!("-");
+    // }
     #[cfg(test)]
     test_main();
-
-    println!("It did not crash!");
-    loop {}
+    kevin_os::hlt_loop();
 }
 
 
@@ -54,7 +57,7 @@ pub extern "C" fn _start() -> ! {
 fn panic(info: &PanicInfo) -> ! {
     use kevin_os::test_panic_handler;
 
-    test_panic_handler(info)
+    test_panic_handler(info);
 }
 
 #[test_case]
