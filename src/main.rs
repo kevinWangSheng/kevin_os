@@ -6,6 +6,8 @@
 mod serial;
 use core::panic::PanicInfo;
 
+use x86_64::{PhysAddr, VirtAddr};
+
 // use vga_buffer::{BUFFER_HEIGHT, WRITER};
 // use x86_64::structures::idt::Entry;
 mod vga_buffer;
@@ -30,9 +32,12 @@ pub extern "C" fn _start() -> ! {
     //     }
     // }
     // vga_buffer::write_something();
+    use x86_64::registers::control::Cr3;
     println!("hello world!!");
     kevin_os::init();
     
+    let (level_4_page_table,_) = Cr3::read();
+    println!("The level 4 page table address is at the :{:?}",level_4_page_table);
     fn stack_overflow(){
         stack_overflow();
     }
