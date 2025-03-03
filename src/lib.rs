@@ -7,8 +7,11 @@
 pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
+pub mod memory;
 use core::panic::PanicInfo;
 pub mod gdt;
+#[cfg(test)]
+use bootloader::{entry_point, BootInfo};
 use vga_buffer::{BUFFER_HEIGHT, WRITER};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -41,13 +44,24 @@ pub fn test_runner(tests: &[&dyn Testable]) {
 }
 
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
-    // init the breakpoint exception
+entry_point!(test_kernel_main);
+
+#[cfg(test)]
+pub fn test_kernel_main(_boot_info:&'static BootInfo)->!{
     init();
     test_main();
     hlt_loop();
 }
+// #[cfg(test)]
+// #[no_mangle]
+// pub extern "C" fn _start() -> ! {
+//     // init the breakpoint exception
+
+
+//     init();
+//     test_main();
+//     hlt_loop();
+// }
 
 #[cfg(test)]
 #[panic_handler]
