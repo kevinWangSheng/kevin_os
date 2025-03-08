@@ -2,14 +2,11 @@ use core::panic;
 
 use lazy_static::lazy_static;
 
-use pc_keyboard::{DecodedKey, HandleControl, KeyboardLayout, ScancodeSet, ScancodeSet1};
+use pc_keyboard::{DecodedKey, HandleControl, ScancodeSet1};
 use spin::Mutex;
-use x86_64::{
-    instructions::port::Port,
-    structures::{idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode}, paging::PageTable},
-};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
-use crate::{exit_qemu, gdt, hlt_loop, print, println};
+use crate::{gdt, hlt_loop, print, println};
 
 pub const PIC_1_OFFER: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFER + 8;

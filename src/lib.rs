@@ -8,12 +8,13 @@ pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
 pub mod memory;
+pub mod alloctor;
 use core::panic::PanicInfo;
 pub mod gdt;
 #[cfg(test)]
 use bootloader::{entry_point, BootInfo};
 use vga_buffer::{BUFFER_HEIGHT, WRITER};
-
+extern crate alloc;
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum QemuExitCode {
@@ -79,14 +80,14 @@ pub fn hlt_loop() ->!{
 }
 
 pub trait Testable {
-    fn run(&self) -> ();
+    fn run(&self);
 }
 
 impl<T> Testable for T
 where
     T: Fn(),
 {
-    fn run(&self) -> () {
+    fn run(&self) {
         serial_println!("{}...\t", core::any::type_name::<T>());
         self();
         serial_println!("[OK]");

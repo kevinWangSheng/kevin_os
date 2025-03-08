@@ -7,8 +7,8 @@ mod serial;
 use core::{panic::PanicInfo};
 
 use bootloader::{entry_point, BootInfo};
-use kevin_os::memory::{self, active_level_4_table, translate_addr};
-use x86_64::{structures::paging::{Page, PageTable, Translate}, VirtAddr};
+use kevin_os::{alloctor, memory::{self}};
+use x86_64::{structures::paging::Page, VirtAddr};
 
 // use vga_buffer::{BUFFER_HEIGHT, WRITER};
 // use x86_64::structures::idt::Entry;
@@ -22,7 +22,8 @@ fn panic(_info: &PanicInfo) -> ! {
 }
 #[allow(dead_code)]
 static HELLO: &[u8] = b"Hello World!";
-
+extern crate alloc;
+use alloc::{boxed::Box, rc::Rc, vec::{self, Vec}};
 entry_point!(kernel_main);
 
 fn kernel_main(_boot_info: &'static BootInfo) -> ! {
@@ -36,7 +37,7 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     // }
     // vga_buffer::write_something();
     use kevin_os::memory::BootInfoFrameAllocator;
-    use kevin_os::memory::translate_addr;
+    
     println!("hello world!!");
     kevin_os::init();
 
@@ -48,16 +49,33 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     let mut mapper = unsafe {
         memory::init(phy_mem_offset)
     };
-    let page = Page::containing_address(VirtAddr::new(0xbeaf000));
-    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
-    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
+    alloctor::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
-    unsafe {page_ptr.offset(300).write_volatile(0xf021_f077_f065_f04e);}
+    // let page = Page::containing_address(VirtAddr::new(0xbeaf000));
+    // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
-    // pub fn stack_overflow(){
-    //     stack_overflow();
-    // }
+    // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
+
+    // unsafe {page_ptr.offset(300).write_volatile(0xf021_f077_f065_f04e);}
+
+    let x = Box::new(1);
+    let mut vc:Vec<i32> = Vec::new();
+    for i in 0..200{
+        vc.push(i);
+    }
+    println!("vec at {:p}",vc.as_slice());
+
+    use alloc::vec;
+    // create a reference counted vector 
+    let reference_counted = Rc::new(vec![1,2,3]);
+    let cloned_reference = reference_counted.clone();
+    println!("the current reference count is {}",Rc::strong_count(&cloned_reference));
+    core::mem::drop(reference_counted);
+    println!("reference count is {} now ",Rc::strong_count(&cloned_reference));
+    pub fn stack_overflow(){
+        stack_overflow();
+    }
     // trigger a stack overflow
     // stack_overflow();
     // x86_64::instructions::interrupts::int3();
