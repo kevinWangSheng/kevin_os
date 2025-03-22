@@ -7,7 +7,7 @@ mod serial;
 use core::{panic::PanicInfo};
 
 use bootloader::{entry_point, BootInfo};
-use kevin_os::{alloctor, memory::{self}};
+use kevin_os::{allocator, memory::{self}};
 use x86_64::{structures::paging::Page, VirtAddr};
 
 // use vga_buffer::{BUFFER_HEIGHT, WRITER};
@@ -50,7 +50,7 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
         memory::init(phy_mem_offset)
     };
 
-    alloctor::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
     // let page = Page::containing_address(VirtAddr::new(0xbeaf000));
     // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);

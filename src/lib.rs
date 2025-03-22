@@ -8,7 +8,8 @@ pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
 pub mod memory;
-pub mod alloctor;
+pub mod allocator;
+pub mod bump;
 use core::panic::PanicInfo;
 pub mod gdt;
 #[cfg(test)]
