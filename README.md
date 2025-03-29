@@ -1,45 +1,81 @@
-## wsl下启动kernel
-可以在windows安装一个图形化的vsXsr的工具按照如下操作：
-首先，在 Windows 上安装 X Server（如果还没安装）：
+# Kevin OS
 
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Rust Version](https://img.shields.io/badge/rust-nightly-orange)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
-下载 VcXsrv：https://sourceforge.net/projects/vcxsrv/
-安装 VcXsrv
+A minimalist operating system kernel written in Rust, following the [blog_os](https://os.phil-opp.com/) tutorial series.
 
+## Features
 
-在 Windows 上启动 VcXsrv：
+- [x] Bare metal Rust environment
+- [x] VGA text mode output
+- [x] Interrupt handling
+- [x] Memory management with paging
+- [x] Heap allocation
+- [x] Async/await support
+- [x] Keyboard input handling
+- [x] Multitasking
 
-打开开始菜单
-搜索并运行 XLaunch
-设置过程：
+## Prerequisites
 
-选择 "Multiple windows"
-Display number 设置为 0
-选择 "Start no client"
-在 Extra settings 页面勾选 "Disable access control"
-点击 "Finish"
-，然后在wsl下运行
-```sh
-export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+- Rust nightly toolchain
+- QEMU for x86_64 architecture
+- bootimage tool
+- For WSL users: VcXsrv X Server
 
-# 再次检查 DISPLAY
-echo $DISPLAY
+## Building and Running
 
-# 现在尝试允许连接
-xhost +local:
+```bash
+# Build the kernel
+cargo build
+
+# Run in QEMU
+cargo run
 ```
-接着运行：
-```sh
-qemu-system-x86_64 \
-    -drive format=raw,file=target/x86_64_kevin_os/debug/bootimage-kevin_os.bin \
-    -serial stdio \
-    -display sdl
-```
-就会出现一个界面：
-![alt text](image.png)
 
+## WSL Setup Guide
 
-然后如果想要使用更方便的命令整合，比如cargo run运行整个部分，参照.cargo/config.toml的配置如下
+For Windows Subsystem for Linux users, follow these steps to set up a graphical environment:
+
+1. **Install VcXsrv** on Windows:
+   - Download from: https://sourceforge.net/projects/vcxsrv/
+   - Complete the installation
+
+2. **Configure VcXsrv**:
+   - Launch XLaunch from the Start menu
+   - Select "Multiple windows"
+   - Set Display number to 0
+   - Choose "Start no client"
+   - Check "Disable access control" in Extra settings
+   - Click "Finish"
+
+3. **Configure WSL environment**:
+   ```bash
+   # Set display variable
+   export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+
+   # Verify DISPLAY setting
+   echo $DISPLAY
+
+   # Allow connections
+   xhost +local:
+   ```
+
+4. **Run QEMU**:
+   ```bash
+   qemu-system-x86_64 \
+       -drive format=raw,file=target/x86_64_kevin_os/debug/bootimage-kevin_os.bin \
+       -serial stdio \
+       -display sdl
+   ```
+
+   ![QEMU Screenshot](images/image.png)
+
+## Cargo Configuration
+
+To simplify development, add this to your `.cargo/config.toml`:
+
 ```toml
 [target.'cfg(target_os = "none")']
 runner = "bootimage runner"
@@ -60,3 +96,51 @@ qemu-system-x86_64 \
     -display sdl \
 """
 ```
+
+## Implementation Details
+
+This OS kernel includes implementations of:
+- Custom interrupt descriptor table (IDT)
+- Memory paging and frame allocation
+- Multiple heap allocator designs (bump, linked list, fixed-size block)
+- Async/await task executor with waker support
+- VGA text buffer driver for output
+- PS/2 keyboard driver with scancode handling
+- Simple multitasking system
+
+## Project Structure
+
+```
+kevin_os/
+├── src/
+│   ├── main.rs           # Kernel entry point
+│   ├── vga_buffer.rs     # Text mode display driver
+│   ├── interrupts/       # Interrupt handling code
+│   │   ├── mod.rs
+│   │   └── gdt.rs        # Global Descriptor Table
+│   ├── memory/           # Memory management
+│   │   ├── mod.rs
+│   │   ├── paging.rs
+│   │   └── frame.rs
+│   ├── allocator/        # Heap allocators
+│   │   ├── mod.rs
+│   │   ├── bump.rs
+│   │   ├── linked_list.rs
+│   │   └── fixed_size_block.rs
+│   └── task/             # Async task system
+│       ├── mod.rs
+│       ├── executor.rs
+│       ├── keyboard.rs   # Keyboard input handling
+│       └── simple_executor.rs
+├── Cargo.toml
+└── x86_64_kevin_os.json  # Target specification
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [Writing an OS in Rust](https://os.phil-opp.com/) by Philipp Oppermann
+- The Rust OSDev community
