@@ -4,10 +4,10 @@
 #![test_runner(kevin_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 mod serial;
-use core::{panic::PanicInfo};
+use core::{future::Future, panic::PanicInfo, pin::Pin, task::{Context, Poll}};
 
 use bootloader::{entry_point, BootInfo};
-use kevin_os::{allocator, memory::{self}};
+use kevin_os::{allocator, memory::{self}, task::{executor::Executor, keyboard, SimpleExecutor, Task}};
 use x86_64::{structures::paging::Page, VirtAddr};
 
 // use vga_buffer::{BUFFER_HEIGHT, WRITER};
@@ -52,6 +52,12 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
 
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
+
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
+
     // let page = Page::containing_address(VirtAddr::new(0xbeaf000));
     // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
@@ -59,20 +65,21 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
 
     // unsafe {page_ptr.offset(300).write_volatile(0xf021_f077_f065_f04e);}
 
-    let x = Box::new(1);
-    let mut vc:Vec<i32> = Vec::new();
-    for i in 0..200{
-        vc.push(i);
-    }
-    println!("vec at {:p}",vc.as_slice());
+    // let x = Box::new(1);
+    // let mut vc:Vec<i32> = Vec::new();
+    // for i in 0..200{
+    //     vc.push(i);
+    // }
+    // println!("vec at {:p}",vc.as_slice());
 
-    use alloc::vec;
-    // create a reference counted vector 
-    let reference_counted = Rc::new(vec![1,2,3]);
-    let cloned_reference = reference_counted.clone();
-    println!("the current reference count is {}",Rc::strong_count(&cloned_reference));
-    core::mem::drop(reference_counted);
-    println!("reference count is {} now ",Rc::strong_count(&cloned_reference));
+    // use alloc::vec;
+    // // create a reference counted vector 
+    // let reference_counted = Rc::new(vec![1,2,3]);
+    // let cloned_reference = reference_counted.clone();
+    // println!("the current reference count is {}",Rc::strong_count(&cloned_reference));
+    // core::mem::drop(reference_counted);
+    // println!("reference count is {} now ",Rc::strong_count(&cloned_reference));
+
     pub fn stack_overflow(){
         stack_overflow();
     }
@@ -87,6 +94,16 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     #[cfg(test)]
     test_main();
     kevin_os::hlt_loop();
+}
+
+
+async fn async_number()->u32{
+    42
+}
+
+async fn example_task(){
+    let number = async_number().await;
+    println!("async number is :{}",number);
 }
 
 // #[no_mangle]

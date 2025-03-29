@@ -10,6 +10,7 @@ pub mod vga_buffer;
 pub mod memory;
 pub mod allocator;
 pub mod bump;
+pub mod task;
 use core::panic::PanicInfo;
 pub mod gdt;
 #[cfg(test)]

@@ -1,0 +1,7 @@
+{
+    "rust-analyzer.rustc.source": null,
+    "rust-analyzer.cargo.sysroot": "discover",
+    "rust-analyzer.server.extraEnv": {
+        "RUSTUP_TOOLCHAIN": "nightly-2025-02-06-x86_64-unknown-linux-gnu"
+    }
+}
